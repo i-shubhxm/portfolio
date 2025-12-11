@@ -44,7 +44,7 @@
         /* --- VIDEO CARDS --- */
         .video-card {
             position: absolute;
-            width: 400px; /* Standard width */
+            width: 400px; /* Fixed width acts like a phone screen for vertical content */
             background: var(--card-bg);
             border: 1px solid #333;
             padding: 5px;
@@ -71,31 +71,33 @@
         body.admin-mode .delete-btn { display: block; }
 
 
-        /* --- NEW CONTENT SIZING LOGIC --- */
+        /* --- SMART ASPECT RATIOS --- */
         
-        /* 1. Standard 16:9 Container (YouTube/Vimeo) */
+        /* 1. YouTube Standard (16:9) - Wide */
         .content-16x9 {
             width: 100%;
             aspect-ratio: 16/9;
             background: #000;
         }
 
-        /* 2. Vertical 9:16 Container (YouTube Shorts) */
+        /* 2. YouTube Shorts (9:16) - Tall */
         .content-9x16 {
             width: 100%;
             aspect-ratio: 9/16;
             background: #000;
         }
 
-        /* 3. Instagram Container (Flexible height) */
+        /* 3. Instagram (Auto Height) - Fits Square, Portrait, or Reels */
         .content-instagram {
             width: 100%;
-            height: auto; /* Let Instagram determine height */
-            background: transparent; /* Instagram has its own background */
+            /* No fixed aspect ratio. Let Instagram decide the height. */
+            height: auto; 
+            min-height: 400px; /* Fallback size while loading */
+            background: #000;
             display: block;
         }
 
-        /* CRITICAL FIX FOR INSTAGRAM: Override Instagram's inline styles to force width */
+        /* Override Instagram's forced styling to ensure it fits our card width */
         .content-instagram .instagram-media {
             width: 100% !important;
             min-width: unset !important;
@@ -339,6 +341,7 @@
             // --- 2. YOUTUBE SHORTS (Vertical 9:16) ---
             if (input.includes('youtube.com/shorts/')) {
                  const videoId = input.split('/shorts/')[1].split('?')[0];
+                 // Use the Tall 9:16 container
                  return `<div class="content-9x16"><iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen></iframe></div>`;
             }
 
