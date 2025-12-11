@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INFINITE_PORTFOLIO</title>
+    <title>INSTAGRAM_BOARD // PORTFOLIO</title>
     <style>
         :root {
             --bg-color: #050505;
@@ -41,72 +41,67 @@
             background-size: 50px 50px; z-index: -1; opacity: 0.3;
         }
 
-        /* --- VIDEO CARDS --- */
+        /* --- INSTAGRAM CARDS --- */
         .video-card {
             position: absolute;
-            width: 400px; /* Fixed width acts like a phone screen for vertical content */
+            /* 350px is the sweet spot for Insta embeds (looks like phone screen) */
+            width: 350px; 
+            /* Height must be auto to allow Reels/Posts to expand naturally */
+            height: auto;
             background: var(--card-bg);
             border: 1px solid #333;
-            padding: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            /* Padding 0 ensures the embed sits flush */
+            padding: 0;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             transition: border-color 0.2s;
+            /* Ensure it sits above grid */
+            z-index: 10;
         }
 
-        .video-card:hover { border-color: var(--accent); z-index: 100; }
+        .video-card:hover { border-color: var(--accent); z-index: 1000; }
 
         .card-header {
-            height: 25px; background: #111; display: flex; justify-content: space-between;
-            align-items: center; padding: 0 5px; cursor: default; font-size: 0.7rem;
-            letter-spacing: 1px; border-bottom: 1px solid #333; margin-bottom: 5px; pointer-events: none;
+            height: 25px; 
+            background: #111; 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center; 
+            padding: 0 8px; 
+            cursor: default; 
+            font-size: 0.7rem;
+            color: #666;
+            letter-spacing: 1px; 
+            border-bottom: 1px solid #333; 
+            pointer-events: none;
         }
         
-        body.admin-mode .card-header { cursor: grab; pointer-events: auto; }
+        body.admin-mode .card-header { cursor: grab; pointer-events: auto; color: #fff; }
 
         .delete-btn {
-            color: var(--text-main); cursor: pointer; font-weight: bold; padding: 0 5px; display: none;
+            color: #ff4444; cursor: pointer; font-weight: bold; padding: 0 5px; display: none;
         }
-        .delete-btn:hover { background: var(--accent); color: #000; }
+        .delete-btn:hover { color: #fff; }
         body.admin-mode .delete-btn { display: block; }
 
-
-        /* --- SMART ASPECT RATIOS --- */
-        
-        /* 1. YouTube Standard (16:9) - Wide */
-        .content-16x9 {
+        /* Container for the Embed Code */
+        .insta-container {
             width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
+            background: #fff; /* Instagram embeds look best on white/light bg usually */
+            min-height: 200px; /* Placeholder size while loading */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* 2. YouTube Shorts (9:16) - Tall */
-        .content-9x16 {
-            width: 100%;
-            aspect-ratio: 9/16;
-            background: #000;
-        }
-
-        /* 3. Instagram (Auto Height) - Fits Square, Portrait, or Reels */
-        .content-instagram {
-            width: 100%;
-            /* No fixed aspect ratio. Let Instagram decide the height. */
-            height: auto; 
-            min-height: 400px; /* Fallback size while loading */
-            background: #000;
-            display: block;
-        }
-
-        /* Override Instagram's forced styling to ensure it fits our card width */
-        .content-instagram .instagram-media {
-            width: 100% !important;
-            min-width: unset !important;
-            max-width: unset !important;
+        /* Force Instagram's iframe to behave */
+        .instagram-media {
+            min-width: 100% !important;
             margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
         }
-
-        iframe, video { width: 100%; height: 100%; border: none; pointer-events: auto; }
-
 
         /* --- UI OVERLAY --- */
         .hud {
@@ -117,25 +112,29 @@
         .bottom-bar { align-items: flex-end; }
 
         .control-panel {
-            background: rgba(0,0,0,0.9); border: 1px solid var(--accent); padding: 15px;
-            display: none; flex-direction: column; gap: 10px; width: 320px;
+            background: rgba(0,0,0,0.95); border: 1px solid var(--accent); padding: 15px;
+            display: none; flex-direction: column; gap: 10px; width: 350px;
         }
         body.admin-mode .control-panel { display: flex; }
 
         input, button, textarea {
             background: transparent; border: 1px solid #333; color: var(--text-main);
-            padding: 8px; font-family: var(--font-mono); outline: none;
+            padding: 10px; font-family: var(--font-mono); outline: none; font-size: 0.8rem;
         }
-        button { cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+        button { cursor: pointer; text-transform: uppercase; font-weight: bold; }
         button:hover { background: var(--accent); color: #000; }
+        input:focus { border-color: #fff; }
         
         #export-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 500px; background: #000; border: 2px solid #fff; padding: 20px; z-index: 2000; pointer-events: auto;
         }
-        #export-area { width: 100%; height: 150px; font-size: 0.7rem; color: #0f0; }
+        #export-area { width: 100%; height: 150px; font-size: 0.7rem; color: #0f0; margin-bottom: 10px;}
         .admin-tag { display: none; color: #0f0; font-size: 0.7rem; font-weight: bold; }
         body.admin-mode .admin-tag { display: inline; }
+        
+        .instructions { font-size: 0.7rem; color: #888; line-height: 1.4; margin-bottom: 10px; }
+        .highlight { color: #fff; }
 
     </style>
 </head>
@@ -144,15 +143,20 @@
     <div class="hud">
         <div class="top-bar">
             <div style="background:black; padding: 5px; border:1px solid #333;">
-                <strong>PORTFOLIO</strong> // <span id="item-count">0 ITEMS</span>
+                <strong>INSTA_BOARD</strong> // <span id="item-count">0 ITEMS</span>
                 <span class="admin-tag"> // ADMIN_MODE</span>
             </div>
             
             <div class="control-panel">
-                <small>ADD_NEW_SOURCE</small>
-                <input type="text" id="videoUrl" 
-                       placeholder="YT Link, Shorts Link, or Instagram Embed Code...">
-                <button onclick="addVideo()">[ + DEPLOY MEDIA ]</button>
+                <div class="instructions">
+                    INSTRUCTIONS:<br>
+                    1. Go to Instagram Post/Reel.<br>
+                    2. Click <span class="highlight">(...)</span> -> <span class="highlight">Embed</span>.<br>
+                    3. Copy the <span class="highlight">Embed Code</span> (starts with &lt;blockquote).<br>
+                    4. Paste below.
+                </div>
+                <input type="text" id="videoUrl" placeholder="Paste <blockquote...> code here">
+                <button onclick="addVideo()">[ + ADD INSTAGRAM POST ]</button>
                 <div style="height:1px; background:#333; margin: 5px 0;"></div>
                 <button onclick="openExport()" style="border-color: #0f0; color:#0f0;">[ EXPORT CONFIG FOR GITHUB ]</button>
             </div>
@@ -171,7 +175,7 @@
             1. Copy the code below.<br>2. Go to index.html on GitHub.<br>3. Replace SAVED_DATA.<br>4. Commit.
         </p>
         <textarea id="export-area" readonly></textarea>
-        <button onclick="document.getElementById('export-modal').style.display='none'" style="margin-top:10px;">CLOSE</button>
+        <button onclick="document.getElementById('export-modal').style.display='none'">CLOSE</button>
     </div>
 
     <div id="viewport">
@@ -206,7 +210,7 @@
             if(SAVED_DATA.length > 0) {
                 state.videos = SAVED_DATA;
             } else if (state.isAdmin) {
-                const local = localStorage.getItem('infinite_portfolio_data');
+                const local = localStorage.getItem('insta_portfolio_data');
                 if(local) state.videos = JSON.parse(local);
             }
             centerCanvas();
@@ -272,13 +276,20 @@
             state.pointY = window.innerHeight / 2;
         }
 
-        // --- VIDEO MANAGEMENT ---
+        // --- INSTAGRAM MANAGEMENT ---
         function addVideo() {
-            const url = document.getElementById('videoUrl').value;
-            if(!url) return;
+            const input = document.getElementById('videoUrl').value;
+            if(!input) return;
+            
+            // Validation: Ensure it looks like an embed code
+            if(!input.includes('<blockquote')) {
+                alert("Please paste the full EMBED CODE from Instagram (starts with <blockquote...), not just the URL.");
+                return;
+            }
+
             const newVideo = {
-                id: 'vid_' + Date.now(),
-                url: url,
+                id: 'insta_' + Date.now(),
+                code: input, // We save the raw HTML code
                 x: (Math.random() * 200) - 100,
                 y: (Math.random() * 200) - 100
             };
@@ -309,58 +320,21 @@
             div.style.left = v.x + 'px';
             div.style.top = v.y + 'px';
             
-            // Get the generated HTML block based on input type
-            const contentHtml = getEmbedCode(v.url);
-
             div.innerHTML = `
                 <div class="card-header" onmousedown="startDragVideo(event, '${v.id}')">
                     <span>${v.id.toUpperCase()}</span>
                     <span class="delete-btn" onclick="deleteVideo('${v.id}')">[X]</span>
                 </div>
-                ${contentHtml}
+                <div class="insta-container">
+                    ${v.code} 
+                </div>
             `;
             world.appendChild(div);
 
-            // Tell Instagram's script to process any new embed codes
-            if (window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process) {
+            // PROCESS EMBEDS
+            if (window.instgrm && window.instgrm.Embeds) {
                 window.instgrm.Embeds.process();
             }
-        }
-
-        function getEmbedCode(input) {
-            // --- 1. INSTAGRAM (Posts & Reels) ---
-            if (input.includes('instagram.com/p/') || input.includes('instagram.com/reel/') || input.includes('instagram-media')) {
-                if(input.includes('<blockquote') && input.includes('instagram-media')) {
-                    // Wrap raw embed code in our flexible container
-                    return `<div class="content-instagram">${input}</div>`;
-                } else {
-                   return `<div class="content-instagram" style="color:#666;padding:20px;">Error: Please paste the full Instagram Embed Code, not just the URL.</div>`;
-                }
-            }
-
-            // --- 2. YOUTUBE SHORTS (Vertical 9:16) ---
-            if (input.includes('youtube.com/shorts/')) {
-                 const videoId = input.split('/shorts/')[1].split('?')[0];
-                 // Use the Tall 9:16 container
-                 return `<div class="content-9x16"><iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen></iframe></div>`;
-            }
-
-            // --- 3. STANDARD YOUTUBE/VIMEO (16:9) ---
-            let videoId = null;
-            if (input.includes('youtube.com') || input.includes('youtu.be')) {
-                if (input.includes('v=')) videoId = input.split('v=')[1].split('&')[0];
-                else if (input.includes('youtu.be/')) videoId = input.split('youtu.be/')[1];
-                if (videoId) return `<div class="content-16x9"><iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen></iframe></div>`;
-            } else if (input.includes('vimeo.com')) {
-                const parts = input.split('.com/');
-                if (parts.length > 1) {
-                    videoId = parts[1].split('/')[0];
-                    return `<div class="content-16x9"><iframe src="https://player.vimeo.com/video/${videoId}" allowfullscreen></iframe></div>`;
-                }
-            }
-            
-            // --- 4. FALLBACK ---
-            return `<div class="content-16x9"><video controls><source src="${input}" type="video/mp4"></video></div>`;
         }
 
         function startDragVideo(e, id) {
@@ -377,7 +351,7 @@
         }
 
         function saveToStorage() {
-            if(state.isAdmin) localStorage.setItem('infinite_portfolio_data', JSON.stringify(state.videos));
+            if(state.isAdmin) localStorage.setItem('insta_portfolio_data', JSON.stringify(state.videos));
         }
 
         function openExport() {
