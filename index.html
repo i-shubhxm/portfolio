@@ -343,6 +343,12 @@
                 <div class="video-content">${getEmbedCode(v.url)}</div>
             `;
             world.appendChild(div);
+
+            // --- THE FIX ---
+            // Tell Instagram's script to process any new embed codes that were just added to the page.
+            if (window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process) {
+                window.instgrm.Embeds.process();
+            }
         }
 
         function getEmbedCode(input) {
