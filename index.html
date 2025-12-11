@@ -27,36 +27,24 @@
 
         /* --- THE INFINITE CANVAS --- */
         #viewport {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            cursor: grab;
-            overflow: hidden;
+            width: 100%; height: 100%; position: relative; cursor: grab; overflow: hidden;
         }
         #viewport:active { cursor: grabbing; }
 
         #canvas-world {
-            position: absolute;
-            top: 0; left: 0;
-            transform-origin: 0 0;
+            position: absolute; top: 0; left: 0; transform-origin: 0 0;
         }
 
         .grid-layer {
-            position: absolute;
-            top: -5000px; left: -5000px;
-            width: 10000px; height: 10000px;
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
-            opacity: 0.3;
+            position: absolute; top: -5000px; left: -5000px; width: 10000px; height: 10000px;
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: -1; opacity: 0.3;
         }
 
         /* --- VIDEO CARDS --- */
         .video-card {
             position: absolute;
-            width: 400px;
+            width: 400px; /* Standard width */
             background: var(--card-bg);
             border: 1px solid #333;
             padding: 5px;
@@ -69,59 +57,60 @@
         .video-card:hover { border-color: var(--accent); z-index: 100; }
 
         .card-header {
-            height: 25px;
-            background: #111;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 5px;
-            cursor: default; 
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            border-bottom: 1px solid #333;
-            margin-bottom: 5px;
-            pointer-events: none;
+            height: 25px; background: #111; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 5px; cursor: default; font-size: 0.7rem;
+            letter-spacing: 1px; border-bottom: 1px solid #333; margin-bottom: 5px; pointer-events: none;
         }
         
         body.admin-mode .card-header { cursor: grab; pointer-events: auto; }
 
         .delete-btn {
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: bold;
-            padding: 0 5px;
-            display: none;
+            color: var(--text-main); cursor: pointer; font-weight: bold; padding: 0 5px; display: none;
         }
-        
         .delete-btn:hover { background: var(--accent); color: #000; }
-
         body.admin-mode .delete-btn { display: block; }
 
-        .video-content {
-            width: 100%;
-            /* Removed aspect-ratio here to allow Instagram's native sizing to work */
-            background: #000;
-            position: relative;
-        }
+
+        /* --- NEW CONTENT SIZING LOGIC --- */
         
-        /* Specific styling for Instagram embeds */
-        .instagram-embed {
-            min-height: 400px; /* Give it a default size */
+        /* 1. Standard 16:9 Container (YouTube/Vimeo) */
+        .content-16x9 {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+
+        /* 2. Vertical 9:16 Container (YouTube Shorts) */
+        .content-9x16 {
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: #000;
+        }
+
+        /* 3. Instagram Container (Flexible height) */
+        .content-instagram {
+            width: 100%;
+            height: auto; /* Let Instagram determine height */
+            background: transparent; /* Instagram has its own background */
+            display: block;
+        }
+
+        /* CRITICAL FIX FOR INSTAGRAM: Override Instagram's inline styles to force width */
+        .content-instagram .instagram-media {
+            width: 100% !important;
+            min-width: unset !important;
+            max-width: unset !important;
+            margin: 0 !important;
         }
 
         iframe, video { width: 100%; height: 100%; border: none; pointer-events: auto; }
 
+
         /* --- UI OVERLAY --- */
         .hud {
             position: fixed; z-index: 1000; padding: 10px; pointer-events: none;
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            justify-content: space-between;
+            width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between;
         }
-
         .top-bar, .bottom-bar { pointer-events: auto; display: flex; justify-content: space-between; }
         .bottom-bar { align-items: flex-end; }
 
@@ -129,26 +118,20 @@
             background: rgba(0,0,0,0.9); border: 1px solid var(--accent); padding: 15px;
             display: none; flex-direction: column; gap: 10px; width: 320px;
         }
-
         body.admin-mode .control-panel { display: flex; }
 
         input, button, textarea {
             background: transparent; border: 1px solid #333; color: var(--text-main);
             padding: 8px; font-family: var(--font-mono); outline: none;
         }
-
         button { cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
         button:hover { background: var(--accent); color: #000; }
         
-        /* Export Modal */
         #export-modal {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 500px; background: #000;
-            border: 2px solid #fff; padding: 20px; z-index: 2000; pointer-events: auto;
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 500px; background: #000; border: 2px solid #fff; padding: 20px; z-index: 2000; pointer-events: auto;
         }
         #export-area { width: 100%; height: 150px; font-size: 0.7rem; color: #0f0; }
-
-        /* Admin Indicator */
         .admin-tag { display: none; color: #0f0; font-size: 0.7rem; font-weight: bold; }
         body.admin-mode .admin-tag { display: inline; }
 
@@ -166,7 +149,7 @@
             <div class="control-panel">
                 <small>ADD_NEW_SOURCE</small>
                 <input type="text" id="videoUrl" 
-                       placeholder="YT/Vimeo URL, or Instagram Embed Code...">
+                       placeholder="YT Link, Shorts Link, or Instagram Embed Code...">
                 <button onclick="addVideo()">[ + DEPLOY MEDIA ]</button>
                 <div style="height:1px; background:#333; margin: 5px 0;"></div>
                 <button onclick="openExport()" style="border-color: #0f0; color:#0f0;">[ EXPORT CONFIG FOR GITHUB ]</button>
@@ -183,10 +166,7 @@
     <div id="export-modal">
         <h3>SYSTEM_EXPORT</h3>
         <p style="font-size:0.8rem; margin: 10px 0; color:#aaa;">
-            1. Copy the code below.<br>
-            2. Go to your <strong>index.html</strong> on GitHub.<br>
-            3. Replace the <strong>SAVED_DATA</strong> section.<br>
-            4. Commit changes.
+            1. Copy the code below.<br>2. Go to index.html on GitHub.<br>3. Replace SAVED_DATA.<br>4. Commit.
         </p>
         <textarea id="export-area" readonly></textarea>
         <button onclick="document.getElementById('export-modal').style.display='none'" style="margin-top:10px;">CLOSE</button>
@@ -208,31 +188,25 @@
         // ==========================================
 
         const state = {
-            scale: 1, panning: false,
-            pointX: 0, pointY: 0, startX: 0, startY: 0,
-            videos: [], isAdmin: false,
-            draggedVideoId: null, dragOffsetX: 0, dragOffsetY: 0
+            scale: 1, panning: false, pointX: 0, pointY: 0, startX: 0, startY: 0,
+            videos: [], isAdmin: false, draggedVideoId: null, dragOffsetX: 0, dragOffsetY: 0
         };
 
         const viewport = document.getElementById('viewport');
         const world = document.getElementById('canvas-world');
 
         window.onload = () => {
-            // 1. Check for Secret Admin URL
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get('edit') === 'true') {
                 state.isAdmin = true;
                 document.body.classList.add('admin-mode');
             }
-
-            // 2. Load Data
             if(SAVED_DATA.length > 0) {
                 state.videos = SAVED_DATA;
             } else if (state.isAdmin) {
                 const local = localStorage.getItem('infinite_portfolio_data');
                 if(local) state.videos = JSON.parse(local);
             }
-            
             centerCanvas();
             renderVideos();
             updateTransform();
@@ -281,10 +255,7 @@
         window.addEventListener('mouseup', () => {
             state.panning = false;
             viewport.style.cursor = "grab";
-            if(state.draggedVideoId) {
-                saveToStorage(); 
-                state.draggedVideoId = null;
-            }
+            if(state.draggedVideoId) { saveToStorage(); state.draggedVideoId = null; }
         });
 
         function updateTransform() {
@@ -335,59 +306,58 @@
             div.id = v.id;
             div.style.left = v.x + 'px';
             div.style.top = v.y + 'px';
+            
+            // Get the generated HTML block based on input type
+            const contentHtml = getEmbedCode(v.url);
+
             div.innerHTML = `
                 <div class="card-header" onmousedown="startDragVideo(event, '${v.id}')">
                     <span>${v.id.toUpperCase()}</span>
                     <span class="delete-btn" onclick="deleteVideo('${v.id}')">[X]</span>
                 </div>
-                <div class="video-content">${getEmbedCode(v.url)}</div>
+                ${contentHtml}
             `;
             world.appendChild(div);
 
-            // --- THE FIX ---
-            // Tell Instagram's script to process any new embed codes that were just added to the page.
+            // Tell Instagram's script to process any new embed codes
             if (window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process) {
                 window.instgrm.Embeds.process();
             }
         }
 
         function getEmbedCode(input) {
-            // 1. INSTAGRAM (Check for the embed script first)
+            // --- 1. INSTAGRAM (Posts & Reels) ---
             if (input.includes('instagram.com/p/') || input.includes('instagram.com/reel/') || input.includes('instagram-media')) {
-                // If the user pasted a URL, tell them to use the embed code (or just use the code if they pasted it)
                 if(input.includes('<blockquote') && input.includes('instagram-media')) {
-                    // User pasted the full embed code
-                    return `<div class="instagram-embed">${input}</div>`;
-                } else if (input.includes('instagram.com')) {
-                    // User pasted the URL. We can't auto-embed with static HTML.
-                    return `
-                        <div class="instagram-embed" style="color: #666; padding: 20px; font-size: 0.8rem;">
-                            PASTE INSTAGRAM EMBED CODE. <br><br>
-                            1. Visit the Post/Reel on Instagram.<br>
-                            2. Click '...' (top right) -> 'Embed'.<br>
-                            3. Copy the entire code block and paste it here.
-                        </div>
-                    `;
+                    // Wrap raw embed code in our flexible container
+                    return `<div class="content-instagram">${input}</div>`;
+                } else {
+                   return `<div class="content-instagram" style="color:#666;padding:20px;">Error: Please paste the full Instagram Embed Code, not just the URL.</div>`;
                 }
             }
 
-            // 2. YOUTUBE / VIMEO (Existing Logic)
+            // --- 2. YOUTUBE SHORTS (Vertical 9:16) ---
+            if (input.includes('youtube.com/shorts/')) {
+                 const videoId = input.split('/shorts/')[1].split('?')[0];
+                 return `<div class="content-9x16"><iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen></iframe></div>`;
+            }
+
+            // --- 3. STANDARD YOUTUBE/VIMEO (16:9) ---
             let videoId = null;
             if (input.includes('youtube.com') || input.includes('youtu.be')) {
-                if (input.includes('/shorts/')) videoId = input.split('/shorts/')[1].split('?')[0];
-                else if (input.includes('v=')) videoId = input.split('v=')[1].split('&')[0];
+                if (input.includes('v=')) videoId = input.split('v=')[1].split('&')[0];
                 else if (input.includes('youtu.be/')) videoId = input.split('youtu.be/')[1];
-                if (videoId) return `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen></iframe>`;
+                if (videoId) return `<div class="content-16x9"><iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen></iframe></div>`;
             } else if (input.includes('vimeo.com')) {
                 const parts = input.split('.com/');
                 if (parts.length > 1) {
                     videoId = parts[1].split('/')[0];
-                    return `<iframe src="https://player.vimeo.com/video/${videoId}" allowfullscreen></iframe>`;
+                    return `<div class="content-16x9"><iframe src="https://player.vimeo.com/video/${videoId}" allowfullscreen></iframe></div>`;
                 }
             }
             
-            // 3. FALLBACK (Direct File)
-            return `<video controls><source src="${input}" type="video/mp4"></video>`;
+            // --- 4. FALLBACK ---
+            return `<div class="content-16x9"><video controls><source src="${input}" type="video/mp4"></video></div>`;
         }
 
         function startDragVideo(e, id) {
@@ -404,16 +374,12 @@
         }
 
         function saveToStorage() {
-            if(state.isAdmin) {
-                localStorage.setItem('infinite_portfolio_data', JSON.stringify(state.videos));
-            }
+            if(state.isAdmin) localStorage.setItem('infinite_portfolio_data', JSON.stringify(state.videos));
         }
 
         function openExport() {
             const dataString = JSON.stringify(state.videos);
-            const exportText = `const SAVED_DATA = ${dataString};`;
-            
-            document.getElementById('export-area').value = exportText;
+            document.getElementById('export-area').value = `const SAVED_DATA = ${dataString};`;
             document.getElementById('export-modal').style.display = 'block';
             document.getElementById('export-area').select();
         }
