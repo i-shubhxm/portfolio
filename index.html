@@ -75,15 +75,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 5px;
-            cursor: default; /* Default to no grab */
+            cursor: default; 
             font-size: 0.7rem;
             letter-spacing: 1px;
             border-bottom: 1px solid #333;
             margin-bottom: 5px;
-            pointer-events: none; /* Clients can't grab headers */
+            pointer-events: none;
         }
         
-        /* Only allow grabbing in Admin Mode */
         body.admin-mode .card-header { cursor: grab; pointer-events: auto; }
 
         .delete-btn {
@@ -91,32 +90,35 @@
             cursor: pointer;
             font-weight: bold;
             padding: 0 5px;
-            display: none; /* Hidden for everyone */
+            display: none;
         }
         
         .delete-btn:hover { background: var(--accent); color: #000; }
 
-        /* Only show delete button in Admin Mode */
         body.admin-mode .delete-btn { display: block; }
 
         .video-content {
             width: 100%;
-            aspect-ratio: 16/9;
+            /* Removed aspect-ratio here to allow Instagram's native sizing to work */
             background: #000;
             position: relative;
         }
+        
+        /* Specific styling for Instagram embeds */
+        .instagram-embed {
+            min-height: 400px; /* Give it a default size */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         iframe, video { width: 100%; height: 100%; border: none; pointer-events: auto; }
 
         /* --- UI OVERLAY --- */
         .hud {
-            position: fixed;
-            z-index: 1000;
-            padding: 10px;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            position: fixed; z-index: 1000; padding: 10px; pointer-events: none;
+            width: 100%; height: 100%; display: flex; flex-direction: column;
             justify-content: space-between;
         }
 
@@ -124,25 +126,15 @@
         .bottom-bar { align-items: flex-end; }
 
         .control-panel {
-            background: rgba(0,0,0,0.9);
-            border: 1px solid var(--accent);
-            padding: 15px;
-            display: none; /* HIDDEN BY DEFAULT */
-            flex-direction: column;
-            gap: 10px;
-            width: 320px;
+            background: rgba(0,0,0,0.9); border: 1px solid var(--accent); padding: 15px;
+            display: none; flex-direction: column; gap: 10px; width: 320px;
         }
 
-        /* Show Control Panel ONLY in Admin Mode */
         body.admin-mode .control-panel { display: flex; }
 
         input, button, textarea {
-            background: transparent;
-            border: 1px solid #333;
-            color: var(--text-main);
-            padding: 8px;
-            font-family: var(--font-mono);
-            outline: none;
+            background: transparent; border: 1px solid #333; color: var(--text-main);
+            padding: 8px; font-family: var(--font-mono); outline: none;
         }
 
         button { cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
@@ -150,16 +142,9 @@
         
         /* Export Modal */
         #export-modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 500px;
-            background: #000;
-            border: 2px solid #fff;
-            padding: 20px;
-            z-index: 2000;
-            pointer-events: auto;
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 500px; background: #000;
+            border: 2px solid #fff; padding: 20px; z-index: 2000; pointer-events: auto;
         }
         #export-area { width: 100%; height: 150px; font-size: 0.7rem; color: #0f0; }
 
@@ -180,8 +165,9 @@
             
             <div class="control-panel">
                 <small>ADD_NEW_SOURCE</small>
-                <input type="text" id="videoUrl" placeholder="Paste YouTube/Shorts/Vimeo URL...">
-                <button onclick="addVideo()">[ + DEPLOY VIDEO ]</button>
+                <input type="text" id="videoUrl" 
+                       placeholder="YT/Vimeo URL, or Instagram Embed Code...">
+                <button onclick="addVideo()">[ + DEPLOY MEDIA ]</button>
                 <div style="height:1px; background:#333; margin: 5px 0;"></div>
                 <button onclick="openExport()" style="border-color: #0f0; color:#0f0;">[ EXPORT CONFIG FOR GITHUB ]</button>
             </div>
@@ -211,12 +197,14 @@
             <div class="grid-layer"></div>
         </div>
     </div>
+    
+    <script async defer src="//www.instagram.com/embed.js"></script>
 
     <script>
         // ==========================================
         //  GITHUB DATA SECTION (PASTE UPDATES HERE)
         // ==========================================
-      const SAVED_DATA = [{"id":"vid_1765348943196","url":"https://youtu.be/YlGTkStN5dw?si=U4UMAWlKgKmXOpLQ","x":-154.528141039824,"y":-86.03144979509582},{"id":"vid_1765348955879","url":"https://youtu.be/mQ-NA_sQ5f8?si=kBkEuyw60aenrKAO","x":-573.3328356485359,"y":-86.019188355562},{"id":"vid_1765357586677","url":"https://youtu.be/kGdBWeCbeM4?si=5qOgb_hC3rzWYB04","x":-576.0594442882459,"y":208.08229092588763}];
+        const SAVED_DATA = []; 
         // ==========================================
 
         const state = {
@@ -241,7 +229,6 @@
             if(SAVED_DATA.length > 0) {
                 state.videos = SAVED_DATA;
             } else if (state.isAdmin) {
-                // If admin and no hardcoded data, check local storage
                 const local = localStorage.getItem('infinite_portfolio_data');
                 if(local) state.videos = JSON.parse(local);
             }
@@ -359,6 +346,26 @@
         }
 
         function getEmbedCode(input) {
+            // 1. INSTAGRAM (Check for the embed script first)
+            if (input.includes('instagram.com/p/') || input.includes('instagram.com/reel/') || input.includes('instagram-media')) {
+                // If the user pasted a URL, tell them to use the embed code (or just use the code if they pasted it)
+                if(input.includes('<blockquote') && input.includes('instagram-media')) {
+                    // User pasted the full embed code
+                    return `<div class="instagram-embed">${input}</div>`;
+                } else if (input.includes('instagram.com')) {
+                    // User pasted the URL. We can't auto-embed with static HTML.
+                    return `
+                        <div class="instagram-embed" style="color: #666; padding: 20px; font-size: 0.8rem;">
+                            PASTE INSTAGRAM EMBED CODE. <br><br>
+                            1. Visit the Post/Reel on Instagram.<br>
+                            2. Click '...' (top right) -> 'Embed'.<br>
+                            3. Copy the entire code block and paste it here.
+                        </div>
+                    `;
+                }
+            }
+
+            // 2. YOUTUBE / VIMEO (Existing Logic)
             let videoId = null;
             if (input.includes('youtube.com') || input.includes('youtu.be')) {
                 if (input.includes('/shorts/')) videoId = input.split('/shorts/')[1].split('?')[0];
@@ -372,6 +379,8 @@
                     return `<iframe src="https://player.vimeo.com/video/${videoId}" allowfullscreen></iframe>`;
                 }
             }
+            
+            // 3. FALLBACK (Direct File)
             return `<video controls><source src="${input}" type="video/mp4"></video>`;
         }
 
@@ -389,7 +398,6 @@
         }
 
         function saveToStorage() {
-            // Only necessary for temporary movement before export
             if(state.isAdmin) {
                 localStorage.setItem('infinite_portfolio_data', JSON.stringify(state.videos));
             }
@@ -406,4 +414,3 @@
     </script>
 </body>
 </html>
-
